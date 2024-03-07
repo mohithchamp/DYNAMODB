@@ -1,0 +1,41 @@
+service: loaddynamo
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.11
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource:
+        - arn:aws:s3:::mybucket99992399/* # provide the bucket name here
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-east-1:544254739196:table/Vesrionstore # Provide the arn of dynamodb table
+
+functions:
+  processS3Object:
+    handler: handler.processS3Object
+    events:
+      - s3:
+          bucket: mybucket99992399
+          event: s3:ObjectCreated:*
+    timeout: 300
+    memorySize: 500
+
+resources:
+  Resources:
+    MyBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: mybucket99992399
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: arn:aws:s3:::mybucket99992399/*

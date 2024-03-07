@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Reader Example</title>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept=".txt, .json">
+<button onclick="processFile()">Process File</button>
+
+<script>
+function processFile() {
+    const fileInput = document.getElementById('fileInput');
+    
+    if (!fileInput.files.length) {
+        alert('Please select a file!');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const content = e.target.result;
+        const jsonObjects = content.split('\n').filter(line => line.trim() !== '').map(line => JSON.parse(line));
+        const jsonData = JSON.stringify(jsonObjects, null, 2);
+
+        // Create a Blob with the JSON data
+        const blob = new Blob([jsonData], { type: 'application/json' });
+
+        // Create a link element to trigger the download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = 'converted_data.json';
+
+        // Append the link to the body and trigger the download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        // Remove the link from the DOM
+        document.body.removeChild(downloadLink);
+    };
+
+    reader.readAsText(file);
+}
+</script>
+
+</body>
+</html>
